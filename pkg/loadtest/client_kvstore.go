@@ -3,7 +3,7 @@ package loadtest
 import (
 	"fmt"
 
-	"github.com/tendermint/tendermint/libs/common"
+	"github.com/tendermint/tendermint/libs/rand"
 )
 
 // The Tendermint common.RandStr method can effectively generate human-readable
@@ -50,6 +50,7 @@ type KVStoreClient struct {
 	keyPrefix    []byte // Contains the client ID
 	keySuffixLen int
 	valueLen     int
+	rd           *rand.Rand
 }
 
 var _ ClientFactory = (*KVStoreClientFactory)(nil)
@@ -83,7 +84,8 @@ func (f *KVStoreClientFactory) ValidateConfig(cfg Config) error {
 }
 
 func (f *KVStoreClientFactory) NewClient(cfg Config) (Client, error) {
-	keyPrefix := []byte(common.RandStr(KVStoreClientIDLen))
+	r := rand.NewRand()
+	keyPrefix := []byte(r.Str(KVStoreClientIDLen))
 	keySuffixLen, err := requiredKVStoreSuffixLen(cfg.MaxTxsPerEndpoint())
 	if err != nil {
 		return nil, err
@@ -95,6 +97,7 @@ func (f *KVStoreClientFactory) NewClient(cfg Config) (Client, error) {
 		keyPrefix:    keyPrefix,
 		keySuffixLen: keySuffixLen,
 		valueLen:     valueLen,
+		rd:           r,
 	}, nil
 }
 
@@ -112,7 +115,7 @@ func requiredKVStoreSuffixLen(maxTxCount uint64) (int, error) {
 }
 
 func (c *KVStoreClient) GenerateTx() ([]byte, error) {
-	k := append(c.keyPrefix, []byte(common.RandStr(c.keySuffixLen))...)
-	v := []byte(common.RandStr(c.valueLen))
+	k := append(c.keyPrefix, []byte(c.rd.Str(c.keySuffixLen))...)
+	v := []byte(c.rd.Str(c.valueLen))
 	return append(k, append([]byte("="), v...)...), nil
 }

@@ -63,10 +63,14 @@ func waitForTendermintNetworkPeers(
 			return nil, fmt.Errorf("failed to resolve IP address for endpoint %s: %s", peerURL, err)
 		}
 
-		peerAddr := fmt.Sprintf("http://%s:26657", peerIP)
+		peerAddr := fmt.Sprintf("http://%s:26657", peerIP)	
+		rpcclient, err := client.NewHTTP(peerAddr, "/websocket")
+		if err != nil {
+			return nil, err
+		}
 		suppliedPeers[peerAddr] = &tendermintPeerInfo{
 			Addr:      peerAddr,
-			Client:    client.NewHTTP(peerAddr, "/websocket"),
+			Client:    rpcclient,
 			PeerAddrs: make([]string, 0),
 		}
 	}
@@ -177,9 +181,13 @@ func resolveTendermintPeerMap(peers map[string]*tendermintPeerInfo) map[string]*
 
 		for _, peerAddr := range peer.PeerAddrs {
 			if _, exists := result[peerAddr]; !exists {
+				rpcclient, err := client.NewHTTP(peerAddr, "/websocket")
+				if err != nil {
+					panic(err)
+				}
 				result[peerAddr] = &tendermintPeerInfo{
 					Addr:      peerAddr,
-					Client:    client.NewHTTP(peerAddr, "/websocket"),
+					Client:    rpcclient,
 					PeerAddrs: make([]string, 0),
 				}
 			}
