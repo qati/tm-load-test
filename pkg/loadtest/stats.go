@@ -7,9 +7,10 @@ import (
 )
 
 type AggregateStats struct {
-	TotalTxs         int     // The total number of transactions sent.
-	TotalTimeSeconds float64 // The total time taken to send `TotalTxs` transactions.
-	TotalBytes       int64   // The cumulative number of bytes sent as transactions.
+	TotalTxs           int     // The total number of transactions sent.
+	TotalTimeSeconds   float64 // The total time taken to send `TotalTxs` transactions.
+	TotalBytes         int64   // The cumulative number of bytes sent as transactions.
+	TotalSuccessfulTxs int
 
 	// Computed statistics
 	AvgTxRate   float64 // The rate at which transactions were submitted (tx/sec).
@@ -18,9 +19,10 @@ type AggregateStats struct {
 
 func (s *AggregateStats) String() string {
 	return fmt.Sprintf(
-		"AggregateStats{TotalTimeSeconds: %.3f, TotalTxs: %d, TotalBytes: %d, AvgTxRate: %.6f, AvgDataRate: %.6f}",
+		"AggregateStats{TotalTimeSeconds: %.3f, TotalTxs: %d, TotalSuccessfulTxs:%d, TotalBytes: %d, AvgTxRate: %.6f, AvgDataRate: %.6f}",
 		s.TotalTimeSeconds,
 		s.TotalTxs,
+		s.TotalSuccessfulTxs,
 		s.TotalBytes,
 		s.AvgTxRate,
 		s.AvgDataRate,
@@ -51,6 +53,7 @@ func writeAggregateStats(filename string, stats AggregateStats) error {
 		{"Parameter", "Value", "Units"},
 		{"total_time", fmt.Sprintf("%.3f", stats.TotalTimeSeconds), "seconds"},
 		{"total_txs", fmt.Sprintf("%d", stats.TotalTxs), "count"},
+		{"total_successful_txs", fmt.Sprintf("%d", stats.TotalSuccessfulTxs), "count"},
 		{"total_bytes", fmt.Sprintf("%d", stats.TotalBytes), "bytes"},
 		{"avg_tx_rate", fmt.Sprintf("%.6f", stats.AvgTxRate), "transactions per second"},
 		{"avg_data_rate", fmt.Sprintf("%.6f", stats.AvgDataRate), "bytes per second"},

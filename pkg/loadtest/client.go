@@ -19,6 +19,7 @@ type Client interface {
 	// broadcast_tx method for a given endpoint.
 	GenerateTx() ([]byte, error)
 	HandleTxResponse(typeID int, response []byte)
+	GetSuccessfulTxCount() int
 }
 
 // Our global registry of client factories

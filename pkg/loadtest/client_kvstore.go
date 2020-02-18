@@ -122,3 +122,7 @@ func (c *KVStoreClient) GenerateTx() ([]byte, error) {
 
 func (c *KVStoreClient) HandleTxResponse(typeID int, response []byte) {
 }
+
+func (c *KVStoreClient) GetSuccessfulTxCount() int {
+	return 0
+}
