@@ -150,13 +150,14 @@ func (t *Transactor) receiveLoop() {
 	defer t.wg.Done()
 	for {
 		// right now we don't care about what we read back from the RPC endpoint
-		_, _, err := t.conn.ReadMessage()
+		msgID, res, err := t.conn.ReadMessage()
 		if err != nil {
 			if !websocket.IsCloseError(err, websocket.CloseNormalClosure) {
 				t.logger.Error("Failed to read response on connection", "err", err)
 				return
 			}
 		}
+		t.client.HandleTxResponse(msgID, res)
 		if t.mustStop() {
 			return
 		}

@@ -119,3 +119,6 @@ func (c *KVStoreClient) GenerateTx() ([]byte, error) {
 	v := []byte(c.rd.Str(c.valueLen))
 	return append(k, append([]byte("="), v...)...), nil
 }
+
+func (c *KVStoreClient) HandleTxResponse(typeID int, response []byte) {
+}
