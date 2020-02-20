@@ -181,8 +181,9 @@ func (t *Transactor) sendLoop() {
 	timeLimitTicker := time.NewTicker(time.Duration(t.config.Time) * time.Second)
 	sendTicker := time.NewTicker(time.Duration(t.config.SendPeriod) * time.Second)
 	progressTicker := time.NewTicker(t.getProgressCallbackInterval())
-	shutDownticker := time.NewTicker(time.Duration(t.config.Time) * time.Second * 2)
+	shutDownticker := time.NewTicker(time.Duration(t.config.SendPeriod) * time.Second)
 	var shutDownCounter int
+	var shutDownActive = false
 	defer func() {
 		pingTicker.Stop()
 		timeLimitTicker.Stop()
@@ -193,9 +194,9 @@ func (t *Transactor) sendLoop() {
 	for {
 		if t.config.Count > 0 && t.GetTxCount() >= t.config.Count {
 			t.logger.Info("Maximum transaction limit reached", "count", t.GetTxCount())
-			shutDownticker = time.NewTicker(time.Duration(t.config.SendPeriod) * time.Second)
 			sendTicker.Stop()
 			timeLimitTicker.Stop()
+			shutDownActive = true
 		}
 		select {
 		case <-sendTicker.C:
@@ -215,14 +216,16 @@ func (t *Transactor) sendLoop() {
 
 		case <-timeLimitTicker.C:
 			t.logger.Info("Time limit reached for load testing")
-			shutDownticker = time.NewTicker(time.Duration(t.config.SendPeriod) * time.Second)
 			sendTicker.Stop()
 			timeLimitTicker.Stop()
+			shutDownActive = true
 		case <-shutDownticker.C:
-			shutDownCounter++
-			if shutDownCounter > shutDownGraceCount || t.client.GetTotalTxCount() == t.client.GetSuccessfulTxCount() {
-				t.logger.Info("Shutdown trigger", "shutDownCounter", shutDownCounter)
-				t.setStop(nil)
+			if shutDownActive {
+				shutDownCounter++
+				if shutDownCounter > shutDownGraceCount || t.client.GetTotalTxCount() == t.client.GetSuccessfulTxCount() {
+					t.logger.Info("Shutdown trigger", "shutDownCounter", shutDownCounter)
+					t.setStop(nil)
+				}
 			}
 		}
 		if t.mustStop() {
