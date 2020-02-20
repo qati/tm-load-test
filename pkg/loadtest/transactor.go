@@ -17,7 +17,8 @@ import (
 const (
 	connSendTimeout = 10 * time.Second
 	// see https://github.com/tendermint/tendermint/blob/master/rpc/lib/server/handlers.go
-	connPingPeriod = (30 * 9 / 10) * time.Second
+	connPingPeriod     = (30 * 9 / 10) * time.Second
+	shutDownGraceCount = 60
 
 	jsonRPCID = rpctypes.JSONRPCStringID("tm-load-test")
 
@@ -180,6 +181,8 @@ func (t *Transactor) sendLoop() {
 	timeLimitTicker := time.NewTicker(time.Duration(t.config.Time) * time.Second)
 	sendTicker := time.NewTicker(time.Duration(t.config.SendPeriod) * time.Second)
 	progressTicker := time.NewTicker(t.getProgressCallbackInterval())
+	var shutDownticker *time.Ticker
+	var shutDownCounter int
 	defer func() {
 		pingTicker.Stop()
 		timeLimitTicker.Stop()
@@ -190,7 +193,9 @@ func (t *Transactor) sendLoop() {
 	for {
 		if t.config.Count > 0 && t.GetTxCount() >= t.config.Count {
 			t.logger.Info("Maximum transaction limit reached", "count", t.GetTxCount())
-			t.setStop(nil)
+			shutDownticker = time.NewTicker(time.Duration(t.config.SendPeriod) * time.Second)
+			sendTicker.Stop()
+			timeLimitTicker.Stop()
 		}
 		select {
 		case <-sendTicker.C:
@@ -210,7 +215,15 @@ func (t *Transactor) sendLoop() {
 
 		case <-timeLimitTicker.C:
 			t.logger.Info("Time limit reached for load testing")
-			t.setStop(nil)
+			shutDownticker = time.NewTicker(time.Duration(t.config.SendPeriod) * time.Second)
+			sendTicker.Stop()
+			timeLimitTicker.Stop()
+		case <-shutDownticker.C:
+			shutDownCounter++
+			if shutDownCounter > shutDownGraceCount || t.client.GetTotalTxCount() == t.client.GetSuccessfulTxCount() {
+				t.logger.Info("Shutdown trigger", "shutDownCounter", shutDownCounter)
+				t.setStop(nil)
+			}
 		}
 		if t.mustStop() {
 			t.close()
