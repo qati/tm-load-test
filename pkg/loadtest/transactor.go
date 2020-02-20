@@ -181,7 +181,7 @@ func (t *Transactor) sendLoop() {
 	timeLimitTicker := time.NewTicker(time.Duration(t.config.Time) * time.Second)
 	sendTicker := time.NewTicker(time.Duration(t.config.SendPeriod) * time.Second)
 	progressTicker := time.NewTicker(t.getProgressCallbackInterval())
-	var shutDownticker *time.Ticker
+	shutDownticker := time.NewTicker(time.Duration(t.config.Time) * time.Second * 2)
 	var shutDownCounter int
 	defer func() {
 		pingTicker.Stop()
