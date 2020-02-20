@@ -126,3 +126,7 @@ func (c *KVStoreClient) HandleTxResponse(typeID int, response []byte) {
 func (c *KVStoreClient) GetSuccessfulTxCount() int {
 	return 0
 }
+
+func (c *KVStoreClient) GetTotalTxCount() int {
+	return 0
+}

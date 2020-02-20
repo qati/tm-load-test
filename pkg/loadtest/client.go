@@ -20,6 +20,7 @@ type Client interface {
 	GenerateTx() ([]byte, error)
 	HandleTxResponse(typeID int, response []byte)
 	GetSuccessfulTxCount() int
+	GetTotalTxCount() int
 }
 
 // Our global registry of client factories

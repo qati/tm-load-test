@@ -115,11 +115,14 @@ func (g *TransactorGroup) Wait() error {
 }
 
 func (g *TransactorGroup) WriteAggregateStats(filename string) error {
+	t := time.Since(g.getStartTime()).Seconds()
 	stats := AggregateStats{
 		TotalTxs:           g.totalTxs(),
 		TotalSuccessfulTxs: g.totalSuccessfulTxs(),
-		TotalTimeSeconds:   time.Since(g.getStartTime()).Seconds(),
+		TotalTimeSeconds:   t,
 		TotalBytes:         g.totalBytes(),
+		TotalClientTxCount: g.totalClientTxCount(),
+		AvgSuccessTxRate:   float64(g.totalSuccessfulTxs()) / float64(t),
 	}
 	return writeAggregateStats(filename, stats)
 }
@@ -188,11 +191,17 @@ func (g *TransactorGroup) totalTxs() int {
 }
 
 func (g *TransactorGroup) totalSuccessfulTxs() int {
-	g.statsMtx.RLock()
-	defer g.statsMtx.RUnlock()
 	total := 0
 	for _, t := range g.transactors {
 		total += t.client.GetSuccessfulTxCount()
+	}
+	return total
+}
+
+func (g *TransactorGroup) totalClientTxCount() int {
+	total := 0
+	for _, t := range g.transactors {
+		total += t.client.GetTotalTxCount()
 	}
 	return total
 }
