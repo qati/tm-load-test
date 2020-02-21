@@ -57,6 +57,10 @@ func ExecuteStandalone(cfg Config) error {
 			logger.Error("Failed to write aggregate statistics", "err", err)
 			return err
 		}
+		if err := tg.WriteClientStats(cfg.ClientStatsDir); err != nil {
+			logger.Error("Failed to write aggregate client statistics", "err", err)
+			return err
+		}
 	}
 
 	logger.Info("Load test complete!")

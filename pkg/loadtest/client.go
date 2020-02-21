@@ -21,6 +21,7 @@ type Client interface {
 	HandleTxResponse(typeID int, response []byte)
 	GetSuccessfulTxCount() int
 	GetTotalTxCount() int
+	ExecuteOnStatistics(fn func(name string, statistics []int64))
 }
 
 // Our global registry of client factories

@@ -66,6 +66,12 @@ func buildCLI(cli *CLIConfig, logger logging.Logger) *cobra.Command {
 	rootCmd.PersistentFlags().StringVar(&cfg.StatsOutputFile, "stats-output", "", "Where to store aggregate statistics (in CSV format) for the load test")
 	rootCmd.PersistentFlags().BoolVarP(&flagVerbose, "verbose", "v", false, "Increase output logging verbosity to DEBUG level")
 
+	rootCmd.PersistentFlags().StringVar(&cfg.ClientStatsDir, "client-stats-dir", "", "Directory where we should put additional client statistics")
+	rootCmd.PersistentFlags().StringVar(&cfg.GenesisAccountName, "genesis-account", "", "Name of genesis account we use to found the benchmark")
+	rootCmd.PersistentFlags().IntVar(&cfg.TargetAccountNumber, "target-account-number", 8192, "Number of desired accounts")
+	rootCmd.PersistentFlags().IntVar(&cfg.SeedFound, "seed-found", 10000000, "We found the benchmark with this amount of tokens")
+	rootCmd.PersistentFlags().IntVar(&cfg.TxAmount, "tx-amount", 50, "Each benchmark tx will be for a transfer of V random amount: 1<V<2*TxAmount")
+
 	var masterCfg MasterConfig
 	masterCmd := &cobra.Command{
 		Use:   "master",

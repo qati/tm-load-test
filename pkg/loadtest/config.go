@@ -36,6 +36,12 @@ type Config struct {
 	PeerConnectTimeout   int      `json:"peer_connect_timeout"`   // The maximum time to wait (in seconds) for all peers to connect, if ExpectPeers > 0.
 	StatsOutputFile      string   `json:"stats_output_file"`      // Where to store the final aggregate statistics file (in CSV format).
 	NoTrapInterrupts     bool     `json:"no_trap_interrupts"`     // Should we avoid trapping Ctrl+Break? Only relevant for standalone execution mode.
+
+	ClientStatsDir      string `json:"client_stats_dir"`      // Directory where we should put additional client statistics
+	GenesisAccountName  string `json:"genesis_account_name"`  // Name of genesis account we use to found the benchmark
+	TargetAccountNumber int    `json:"target_account_number"` // Number of desired accounts
+	SeedFound           int    `json:"seed_found"`            // We found the benchmark with this amount of tokens
+	TxAmount            int    `json:"tx_amount"`             // Each benchmark tx will be for a transfer of V random amount: 1<V<2*TxAmount
 }
 
 // MasterConfig is the configuration options specific to a master node.

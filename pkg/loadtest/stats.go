@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"path"
 )
 
 type AggregateStats struct {
@@ -63,4 +64,18 @@ func writeAggregateStats(filename string, stats AggregateStats) error {
 		{"avg_data_rate", fmt.Sprintf("%.6f", stats.AvgDataRate), "bytes per second"},
 	}
 	return w.WriteAll(records)
+}
+
+func writeClientStats(dir string, stats map[string][]int64) error {
+	for name, v := range stats {
+		f, err := os.Create(path.Join(dir, name))
+		if err != nil {
+			return err
+		}
+		for _, s := range v {
+			fmt.Fprintln(f, s)
+		}
+		f.Close()
+	}
+	return nil
 }

@@ -127,6 +127,22 @@ func (g *TransactorGroup) WriteAggregateStats(filename string) error {
 	return writeAggregateStats(filename, stats)
 }
 
+func (g *TransactorGroup) WriteClientStats(dir string) error {
+	var all map[string][]int64
+	appender := func(name string, stats []int64) {
+		s, ok := all[name]
+		if !ok {
+			all[name] = stats
+			return
+		}
+		all[name] = append(s, stats...)
+	}
+	for _, t := range g.transactors {
+		t.client.ExecuteOnStatistics(appender)
+	}
+	return writeClientStats(dir, all)
+}
+
 func (g *TransactorGroup) progressReporter() {
 	defer close(g.progressReporterStopped)
 
