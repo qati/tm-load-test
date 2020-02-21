@@ -128,7 +128,7 @@ func (g *TransactorGroup) WriteAggregateStats(filename string) error {
 }
 
 func (g *TransactorGroup) WriteClientStats(dir string) error {
-	var all map[string][]int64
+	var all = make(map[string][]int64)
 	appender := func(name string, stats []int64) {
 		s, ok := all[name]
 		if !ok {
