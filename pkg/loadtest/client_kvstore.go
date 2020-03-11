@@ -127,10 +127,13 @@ func (c *KVStoreClient) GetSuccessfulTxCount() int {
 	return 0
 }
 
+func (c *KVStoreClient) GetFailedTxCount() int {
+	return 0
+}
+
 func (c *KVStoreClient) GetTotalTxCount() int {
 	return 0
 }
 
 func (c *KVStoreClient) ExecuteOnStatistics(fn func(name string, statistics []int64)) {
-
 }

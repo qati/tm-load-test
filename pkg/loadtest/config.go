@@ -40,8 +40,9 @@ type Config struct {
 	ClientStatsDir      string `json:"client_stats_dir"`      // Directory where we should put additional client statistics
 	GenesisAccountName  string `json:"genesis_account_name"`  // Name of genesis account we use to found the benchmark
 	TargetAccountNumber int    `json:"target_account_number"` // Number of desired accounts
-	SeedFound           int    `json:"seed_found"`            // We found the benchmark with this amount of tokens
+	SeedFund            int    `json:"seed_fund"`             // We fund the benchmark with this amount of tokens
 	TxAmount            int    `json:"tx_amount"`             // Each benchmark tx will be for a transfer of V random amount: 1<V<2*TxAmount
+	ShutdownMaxWait     int    `json:"shutdown_max_wait"`     // At shutdown if we did not hear back about all txes we wait, this is an upper limit
 }
 
 // MasterConfig is the configuration options specific to a master node.

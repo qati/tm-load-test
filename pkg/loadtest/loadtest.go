@@ -1,6 +1,7 @@
 package loadtest
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/interchainio/tm-load-test/internal/logging"
@@ -31,6 +32,7 @@ func ExecuteStandalone(cfg Config) error {
 	logger.Info("Connecting to remote endpoints")
 	tg := NewTransactorGroup()
 	if err := tg.AddAll(&cfg); err != nil {
+		fmt.Println("FUCK ", err.Error())
 		return err
 	}
 	logger.Info("Initiating load test")

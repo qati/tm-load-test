@@ -1,6 +1,7 @@
 package loadtest
 
 import (
+	"fmt"
 	"sync"
 	"time"
 )
@@ -69,6 +70,7 @@ func (g *TransactorGroup) SetProgressCallback(interval time.Duration, callback f
 
 // Start will handle through all transactors and start them.
 func (g *TransactorGroup) Start() {
+	fmt.Println("TRANSACTOR GROUP START ")
 	go g.progressReporter()
 	for _, t := range g.transactors {
 		t.Start()
@@ -119,10 +121,10 @@ func (g *TransactorGroup) WriteAggregateStats(filename string) error {
 	stats := AggregateStats{
 		TotalTxs:           g.totalTxs(),
 		TotalSuccessfulTxs: g.totalSuccessfulTxs(),
+		TotalFailedTxs:     g.totalFailedTxs(),
 		TotalTimeSeconds:   t,
 		TotalBytes:         g.totalBytes(),
 		TotalClientTxCount: g.totalClientTxCount(),
-		AvgSuccessTxRate:   float64(g.totalSuccessfulTxs()) / float64(t),
 	}
 	return writeAggregateStats(filename, stats)
 }
@@ -210,6 +212,14 @@ func (g *TransactorGroup) totalSuccessfulTxs() int {
 	total := 0
 	for _, t := range g.transactors {
 		total += t.client.GetSuccessfulTxCount()
+	}
+	return total
+}
+
+func (g *TransactorGroup) totalFailedTxs() int {
+	total := 0
+	for _, t := range g.transactors {
+		total += t.client.GetFailedTxCount()
 	}
 	return total
 }

@@ -20,6 +20,7 @@ type Client interface {
 	GenerateTx() ([]byte, error)
 	HandleTxResponse(typeID int, response []byte)
 	GetSuccessfulTxCount() int
+	GetFailedTxCount() int
 	GetTotalTxCount() int
 	ExecuteOnStatistics(fn func(name string, statistics []int64))
 }

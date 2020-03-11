@@ -15,10 +15,9 @@ import (
 )
 
 const (
-	connSendTimeout = 10 * time.Second
+	connSendTimeout = 100 * time.Second
 	// see https://github.com/tendermint/tendermint/blob/master/rpc/lib/server/handlers.go
-	connPingPeriod     = (30 * 9 / 10) * time.Second
-	shutDownGraceCount = 60
+	connPingPeriod = (30 * 9 / 10) * time.Second
 
 	jsonRPCID = rpctypes.JSONRPCStringID("tm-load-test")
 
@@ -103,7 +102,7 @@ func (t *Transactor) SetProgressCallback(id int, interval time.Duration, callbac
 // Start kicks off the transactor's operations in separate goroutines (one for
 // reading from the WebSockets endpoint, and one for writing to it).
 func (t *Transactor) Start() {
-	t.logger.Debug("Starting transactor")
+	t.logger.Info("Starting transactor")
 	t.wg.Add(2)
 	go t.receiveLoop()
 	go t.sendLoop()
@@ -151,6 +150,7 @@ func (t *Transactor) receiveLoop() {
 	defer t.wg.Done()
 	for {
 		// right now we don't care about what we read back from the RPC endpoint
+		t.conn.SetReadLimit(1024 * 1024 * 100)
 		msgID, res, err := t.conn.ReadMessage()
 		if err != nil {
 			if !websocket.IsCloseError(err, websocket.CloseNormalClosure) {
@@ -184,6 +184,7 @@ func (t *Transactor) sendLoop() {
 	shutDownticker := time.NewTicker(time.Duration(t.config.SendPeriod) * time.Second)
 	var shutDownCounter int
 	var shutDownActive = false
+	var shutDownGraceCount = t.config.ShutdownMaxWait
 	defer func() {
 		pingTicker.Stop()
 		timeLimitTicker.Stop()
@@ -222,8 +223,12 @@ func (t *Transactor) sendLoop() {
 		case <-shutDownticker.C:
 			if shutDownActive {
 				shutDownCounter++
-				if shutDownCounter > shutDownGraceCount || t.client.GetTotalTxCount() == t.client.GetSuccessfulTxCount() {
-					t.logger.Info("Shutdown trigger", "shutDownCounter", shutDownCounter)
+				weHeardAboutCount := t.client.GetSuccessfulTxCount() + t.client.GetFailedTxCount()
+				if shutDownCounter%10 == 0 {
+					t.logger.Info("Shutdown waiting on tx execution", "executed", weHeardAboutCount, "total", t.client.GetTotalTxCount(), "time", shutDownCounter*t.config.SendPeriod)
+				}
+				if shutDownCounter > shutDownGraceCount || t.client.GetTotalTxCount() == weHeardAboutCount {
+					t.logger.Info("Shutdown trigger", "waitedForExecutionSec", shutDownCounter*t.config.SendPeriod)
 					t.setStop(nil)
 				}
 			}
