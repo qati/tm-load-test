@@ -1,6 +1,6 @@
 module github.com/interchainio/tm-load-test
 
-go 1.13
+go 1.14
 
 require (
 	github.com/btcsuite/btcd v0.0.0-20190824003749-130ea5bddde3 // indirect
@@ -14,8 +14,7 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
-	github.com/tendermint/go-amino v0.15.0 // indirect
-	github.com/tendermint/tendermint v0.33.0
+	github.com/tendermint/tendermint v0.33.1
 	golang.org/x/crypto v0.0.0-20191206172530-e9b2fee46413
 	golang.org/x/net v0.0.0-20190909003024-a7b16738d86b // indirect
 	golang.org/x/sys v0.0.0-20190910064555-bbd175535a8b // indirect
